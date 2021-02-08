@@ -20,7 +20,14 @@ public class AVL <K extends Comparable<K>, V> extends ArbolBinarioBusqueda<K, V>
         if (claveAInsertar == null) {
             throw new IllegalArgumentException("Valor no puede ser nulo");
         }
-        super.raiz = this.insertar(this.raiz,claveAInsertar,valorAInsertar);
+        if (this.esArbolVacio()){
+            NodoBinario<K,V> nuevoNodo= new NodoBinario<>();
+            nuevoNodo.setClave(claveAInsertar);
+            nuevoNodo.setValor(valorAInsertar);
+            this.raiz=nuevoNodo;
+        } else{
+            super.raiz = this.insertar(this.raiz,claveAInsertar,valorAInsertar);
+        }
     }
     
     private NodoBinario<K,V> insertar(NodoBinario<K,V> nodoActual,K claveAInsertar, V valorAInsertar){
@@ -115,6 +122,9 @@ public class AVL <K extends Comparable<K>, V> extends ArbolBinarioBusqueda<K, V>
 
     private NodoBinario<K,V> eliminar(NodoBinario<K,V> nodoActual, K claveAEliminar){
         K claveActual  = nodoActual.getClave();
+        if (NodoBinario.esNodoVacio(nodoActual)){
+            return null;
+        }
         if (claveAEliminar.compareTo(claveActual) > 0){
             NodoBinario<K,V> posibleNuevoHDerecho = eliminar(nodoActual.getHijoDerecho(),claveAEliminar);
             nodoActual.setHijoDerecho(posibleNuevoHDerecho);

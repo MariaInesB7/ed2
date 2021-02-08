@@ -27,4 +27,5 @@ public interface IArbolBusqueda <K extends Comparable <K>, V>{
     List<K> recorridoEnPreOrden();
     List<K> recorridoEnPostOrden();
     List<K> recorridoPorNiveles();
+    String toString();
 }
