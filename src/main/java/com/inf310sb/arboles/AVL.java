@@ -128,12 +128,12 @@ public class AVL <K extends Comparable<K>, V> extends ArbolBinarioBusqueda<K, V>
         if (claveAEliminar.compareTo(claveActual) > 0){
             NodoBinario<K,V> posibleNuevoHDerecho = eliminar(nodoActual.getHijoDerecho(),claveAEliminar);
             nodoActual.setHijoDerecho(posibleNuevoHDerecho);
-            return nodoActual;//balancear
+            return this.balancear(nodoActual);//balancear
         }
         if (claveAEliminar.compareTo(claveActual) < 0){
             NodoBinario<K,V> posibleNuevoHIzquierdoo = eliminar(nodoActual.getHijoIzquierdo(),claveAEliminar);
             nodoActual.setHijoIzquierdo(posibleNuevoHIzquierdoo);
-            return nodoActual;//balancear
+            return this.balancear(nodoActual);//balancear
         }
         //SI LLEGO ACA ENCONTRO EL NODO CON LA CLAVE A ALEIMINAR
         //CASO 1
@@ -151,7 +151,7 @@ public class AVL <K extends Comparable<K>, V> extends ArbolBinarioBusqueda<K, V>
         }
         //CASO 3
         NodoBinario<K,V> nodoReemplazo = this.buscarNodoSucesor(nodoActual.getHijoDerecho());
-        NodoBinario<K,V> posibleNuevoHDerecho = eliminar(nodoActual.getHijoIzquierdo(),nodoReemplazo.getClave());
+        NodoBinario<K,V> posibleNuevoHDerecho = eliminar(nodoActual,nodoReemplazo.getClave());
         nodoActual.setHijoDerecho(posibleNuevoHDerecho);//puede ser que cambie dependiendo del caso 1 o 2
         //lo mas facil reemplazar la clave y el valor del nodo
         nodoActual.setClave(nodoReemplazo.getClave());

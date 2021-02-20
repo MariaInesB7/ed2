@@ -384,7 +384,7 @@ public class ArbolBinarioBusqueda<K extends Comparable<K>, V> implements
         //CASO 3
         NodoBinario<K, V> nodoReemplazo = this.buscarNodoSucesor(nodoActual.getHijoDerecho());
         NodoBinario<K, V> posibleNuevoHDerecho = eliminar(nodoActual, nodoReemplazo.getClave());
-        nodoActual.setHijoDerecho(posibleNuevoHDerecho);//puede ser que cambie dependiendo del caso 1 o 2
+        //nodoActual.setHijoDerecho(posibleNuevoHDerecho);//puede ser que cambie dependiendo del caso 1 o 2
         //lo mas facil reemplazar la clave y el valor del nodo
         nodoActual.setClave(nodoReemplazo.getClave());
         nodoActual.setValor(nodoReemplazo.getValor());
@@ -585,19 +585,19 @@ public class ArbolBinarioBusqueda<K extends Comparable<K>, V> implements
         cadena.append(prefijo);
         
         if (prefijo.length() == 0) {
-            cadena.append(ponerCodo ? "└(RAIZ) " : "├(R)"); //arbol vacio o no
+            cadena.append(ponerCodo ? "────(RAIZ) " : "  ├────(R)"); //arbol vacio o no
         } else {
-            cadena.append(ponerCodo ? "└(DER)" : "├(IZQ)");  //derecha o izquierda
+            cadena.append(ponerCodo ? "  └────(der)" : "  ├────(izq)");  //derecha o izquierda
         }
         if (NodoBinario.esNodoVacio(nodoActual)) {
-            cadena.append("╣\n");
+            cadena.append("───╣\n");
             return cadena.toString();
         }
         cadena.append(nodoActual.getClave().toString());
         cadena.append("\n");
 
         NodoBinario<K,V> nodoIzq = nodoActual.getHijoIzquierdo();
-        String prefijoAux = prefijo + (ponerCodo ? "   ":"|   ");
+        String prefijoAux = prefijo + (ponerCodo ? "           ":"   |    ");
         cadena.append(generarCadenaDeArbol(nodoIzq, prefijoAux, false));
 
         NodoBinario<K,V> nodoDer = nodoActual.getHijoDerecho();
@@ -756,7 +756,6 @@ public int cantidadNodosNivelNSoloHIzquierdoNoVacioRec(int nivel) {
             }
             return true;
         }
-
         boolean esSimilarIzquierda = compararArboles(Nodo1.getHijoIzquierdo(), Nodo2.getHijoIzquierdo());
         boolean esSimilarDerecha = compararArboles(Nodo1.getHijoDerecho(), Nodo2.getHijoDerecho());
         return esSimilarIzquierda && esSimilarDerecha;
@@ -913,5 +912,30 @@ public int cantidadNodosNivelNSoloHIzquierdoNoVacioRec(int nivel) {
         }
     return true ;
     }
+    //extras podar arbol
+    public void podarArbol(K claveAPodar){
+        if (this.esArbolVacio()){
+            return ;
+        }
+        if (this.contiene(claveAPodar)){
+            podarArbol(this.raiz,claveAPodar);
+        }
+    }
+    private NodoBinario<K,V> podarArbol(NodoBinario<K,V> nodoActual, K claveAPodar){
+        if (NodoBinario.esNodoVacio(nodoActual)){
+            return (NodoBinario<K,V>)NodoBinario.nodoVacio();
+        }
+        if (nodoActual.esHoja()){
+            if (nodoActual.getClave().compareTo(claveAPodar)==0){
+                return null;
+            }
+        }
+        if (nodoActual.getClave().compareTo(claveAPodar)==0){
+            return null;
+        }
+        nodoActual.setHijoIzquierdo(podarArbol(nodoActual.getHijoIzquierdo(), claveAPodar));
+        nodoActual.setHijoDerecho(podarArbol(nodoActual.getHijoDerecho(), claveAPodar));
+        return nodoActual;
+                
+    }
 }
-

@@ -40,13 +40,14 @@ public class Practico_1 {
                     (Arrays.asList(2,1,4,3,6,5,8,9,11,10,7));   
         List<String> listVPostOrden = new ArrayList<>
         (Arrays.asList("CF","CA","CZ","CP","FE","CK","LP","MK","VB","TA","HM"));
+        
         IArbolBusqueda<Integer, String> arbolPrueba = new ArbolBinarioBusqueda<>
                     (listKInOrden,listVInOrden,listKPostOrden,listVPostOrden,false);
         IArbolBusqueda<Integer, String> arbolPrueba2 = new ArbolBinarioBusqueda<>();
 //        IArbolBusqueda<Integer, String> arbolPrueba;
 //        arbolPrueba = new ArbolBinarioBusqueda<>();
         ArbolBinarioBusqueda<Integer,String> arbolPruebaBinario = (ArbolBinarioBusqueda<Integer,String>)arbolPrueba;
-        arbolPrueba = new AVL<>();
+        IArbolBusqueda<Integer, String> arbolAVLPrueba = new AVL<>();
 //ejemplos del la diapositiva
         arbolPrueba2.insertar(7, "HM");
         arbolPrueba2.insertar(5, "CK");
@@ -58,7 +59,18 @@ public class Practico_1 {
         arbolPrueba2.insertar(10, "TA");
         arbolPrueba2.insertar(9, "MK");
         arbolPrueba2.insertar(8, "LP");
-        arbolPrueba2.insertar(7, "VB");        
+        arbolPrueba2.insertar(11, "VB");    
+        arbolAVLPrueba.insertar(7, "HM");
+        arbolAVLPrueba.insertar(5, "CK");
+        arbolAVLPrueba.insertar(3, "CP");
+        arbolAVLPrueba.insertar(1, "CA");
+        arbolAVLPrueba.insertar(2, "CF");
+        arbolAVLPrueba.insertar(4, "CZ");
+        arbolAVLPrueba.insertar(6, "FE");
+        arbolAVLPrueba.insertar(10, "TA");
+        arbolAVLPrueba.insertar(9, "MK");
+        arbolAVLPrueba.insertar(8, "LP");
+        arbolAVLPrueba.insertar(11, "VB");
 //1. Implementar los métodos que no se implementaron en clases o que se implementaron a
 //medias de árboles binarios de búsqueda y AVL
 System.out.println("1. ARBOL 1 RECONSTRUIR EN LISTA POST ORDEN [2,1,4,3,6,5,8,9,11,10,7]");
@@ -114,8 +126,7 @@ System.out.println("7. árbol binario es similar al árbol binario recibido ");
             System.out.println("FALSE");
         }
 //8. Implemente el método eliminar de un árbol AVL
-//System.out.println("8. eliminar " + 
-   //     arbolPrueba.eliminar(3));
+//System.out.println("8. eliminar " + arbolAVLPrueba.eliminar(5)+ arbolAVLPrueba.toString());
 
 //9. Para un árbol binario implemente un método que retorne la cantidad de nodos que tienen
 //ambos hijos desde el nivel N.
@@ -135,5 +146,9 @@ System.out.println("11. ÁrbolBinario lleno ");
         } else { 
             System.out.println("FALSE");
         }
+   arbolPruebaBinario.podarArbol(10);
+   System.out.println("Rec Niveles" + arbolPrueba.recorridoPorNiveles()); 
+   System.out.println("Rec InOrden Recursivo" + arbolPruebaBinario.recorridoEnInOrdenRe());
     }
+    
 }

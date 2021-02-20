@@ -6,7 +6,10 @@
 package com.inf310sb.iuArbol;
 
 //import com.inf310sb.arboles.ArbolBinarioBusqueda;
-//import com.inf310sb.arboles.ArbolMViasBusqueda;
+
+import com.inf310sb.arboles.IArbolBusqueda;
+
+import com.inf310sb.arboles.ArbolMViasBusqueda;
 //import com.inf310sb.arboles.IArbolBusqueda;
 
 /**
@@ -20,7 +23,7 @@ public class Practico2 {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-/*        IArbolBusqueda<Integer, String> arbolPrueba = new ArbolMViasBinarioBusqueda<>();
+        IArbolBusqueda<Integer, String> arbolPrueba = new ArbolMViasBusqueda<>();
         arbolPrueba.insertar(50, "Pablo");
         arbolPrueba.insertar(30, "Benja");
         arbolPrueba.insertar(60, "PAPA");
@@ -29,10 +32,10 @@ public class Practico2 {
         arbolPrueba.insertar(40, "Harold");
         arbolPrueba.insertar(70, "Mother");
         arbolPrueba.insertar(55, "Javier");
-        System.out.println(arbolPrueba);
+        System.out.println(arbolPrueba.recorridoEnInOrden());
         System.out.println("RECORRIDO");
-        ArbolBinarioBusqueda<Integer,String> arbolPruebaBinario = 
-*///        System.out.println("Recorrido por Niveles" + arbolPrueba.recorridoPorNiveles());
+
+//     System.out.println("Recorrido por Niveles" + arbolPrueba.recorridoPorNiveles());
 //        System.out.println("Recorrido en InOrden Recursivo" + arbolPruebaBinario.recorridoEnInOrdenRe());
 //        System.out.println("Recorrido en PosOrden" + arbolPrueba.recorridoEnPostOrden());
 //        System.out.println("Recorrido en PosOrden Recursivo" + arbolPruebaBinario.recorridoEnPostOrdenRe());

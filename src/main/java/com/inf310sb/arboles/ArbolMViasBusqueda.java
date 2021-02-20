@@ -5,11 +5,13 @@
  */
 package com.inf310sb.arboles;
 
+import com.inf310sb.arboles.excepciones.ExcepcionClaveNoExiste;
 import com.inf310sb.arboles.excepciones.ExcepcionOrdenInvalido;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Stack;
 
 /**
  *
@@ -20,6 +22,7 @@ public class ArbolMViasBusqueda<K extends Comparable<K>, V> implements
     //variables miembro
     protected NodoMVias<K,V> raiz;
     protected int orden;
+    protected int POSICION_INVALIDA = -1;   
     
     public ArbolMViasBusqueda(){
         this.orden = 3;
@@ -43,39 +46,294 @@ public class ArbolMViasBusqueda<K extends Comparable<K>, V> implements
 
     @Override
     public int size() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (this.esArbolVacio()) {
+            return 0;
+        }
+        int cantidad = 0;
+        Queue<NodoMVias<K, V>> colaNodos = new LinkedList<>();
+        colaNodos.offer(this.raiz);
+        while (!colaNodos.isEmpty()) {
+            NodoMVias<K,V> nodoActual = colaNodos.poll();
+            cantidad++;
+            for (int i = 0; i < nodoActual.cantidadDeClavesNoVacios(); i++) {
+                if (!nodoActual.esHijoVacio(i)){
+                    colaNodos.offer(nodoActual.getHijo(i));
+                }
+            }
+            //ultimo hijo
+            if (!nodoActual.esHijoVacio(nodoActual.cantidadDeClavesNoVacios())){
+                    colaNodos.offer(nodoActual.getHijo(nodoActual.cantidadDeClavesNoVacios()+1));
+                }
+        }
+        return cantidad;
     }
 
     @Override
     public int altura() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return altura(this.raiz);
+    }
+
+    protected int altura(NodoMVias<K, V> nodoActual) {
+        if (NodoMVias.esNodoVacio(nodoActual)) {
+            return 0;
+        }
+        int alturaMayor = 0;
+        for (int i = 0; i < this.orden;i++){
+            int alturaDeHijo = altura(nodoActual.getHijo(i));
+            if (alturaDeHijo > alturaMayor){
+                alturaMayor = alturaDeHijo;
+            }
+            }
+        return alturaMayor + 1;
     }
 
     @Override
     public int nivel() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return nivelRec(this.raiz);
     }
 
+    private int nivelRec(NodoMVias<K,V> nodoActual){
+        if (NodoMVias.esNodoVacio(nodoActual)){
+            return -1;
+        }
+        int nivelMayor = -1;
+        for (int i = 0; i<orden; i++){
+            int nivelDeHijo = nivelRec(nodoActual.getHijo(i));
+            if (nivelDeHijo>nivelMayor){
+                nivelMayor = nivelDeHijo;
+            }
+        }
+        return nivelMayor - 1;
+    }
+    
     @Override
     public K minimo() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (this.esArbolVacio()){
+            return null;
+        }
+        NodoMVias<K,V> nodoActual = this.raiz;
+        NodoMVias<K,V> nodoAnterior = (NodoMVias<K,V>)NodoMVias.nodoVacio();
+        while(!NodoMVias.esNodoVacio(nodoActual)){
+            nodoAnterior = nodoActual;
+            nodoActual = nodoActual.getHijo(0);
+        }
+        return nodoAnterior.getClave(0);
     }
 
     @Override
     public K maximo() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (this.esArbolVacio()){
+            return null;
+        }
+        NodoMVias<K,V> nodoActual = this.raiz;
+        NodoMVias<K,V> nodoAnterior = (NodoMVias<K,V>)NodoMVias.nodoVacio();
+        while(!NodoMVias.esNodoVacio(nodoActual)){
+            nodoAnterior = nodoActual;
+            nodoActual = nodoActual.getHijo(nodoActual.cantidadDeClavesNoVacios());
+        }
+        //pa mi que es nodoAnterior.cantidadDeClavesNoVacios-1
+        return nodoAnterior.getClave(nodoAnterior.cantidadDeClavesNoVacios()-1);
     }
 
     @Override
-    public void insertar(K clave, V valor) {
+    public void insertar(K claveAInsertar, V valorAInsertar) {
+        if (claveAInsertar == null) {
+            throw new IllegalArgumentException("Clave no puede ser nula");
+        }
+        if (claveAInsertar == null) {
+            throw new IllegalArgumentException("Valor no puede ser nulo");
+        }
+        if (this.esArbolVacio()){
+            this.raiz = new NodoMVias<>(this.orden,claveAInsertar,valorAInsertar);
+            return;
+        }
+        NodoMVias<K,V> nodoActual = this.raiz;
         
+        while(!NodoMVias.esNodoVacio(nodoActual)){
+            int posicionClaveExiste = this.existeClaveEnNodo(nodoActual, claveAInsertar);
+            if (posicionClaveExiste != POSICION_INVALIDA){
+                nodoActual.setValor(posicionClaveExiste, valorAInsertar);
+                return;
+            } else {
+                if (nodoActual.esHoja()){//si insertar en hoja
+                    if (nodoActual.estanClavesLenas()){
+                        int posicionPorDondeBajar = this.porDondeBajar(nodoActual,claveAInsertar);
+                        NodoMVias<K,V> nuevoHijo = new NodoMVias<>(this.orden,claveAInsertar,valorAInsertar);
+                        nodoActual.setHijo(posicionPorDondeBajar, nuevoHijo);
+                    }else {
+                        this.insertarDatosEnOrdenadoEnNodo(nodoActual,claveAInsertar,valorAInsertar);
+                    }
+                    return;
+                }else {
+                    int posicionPorDondeBajar = this.porDondeBajar(nodoActual,claveAInsertar);
+                    if (nodoActual.esHijoVacio(posicionPorDondeBajar)){
+                        NodoMVias<K,V> nuevoHijo = new NodoMVias<>(this.orden,claveAInsertar,valorAInsertar);
+                        nodoActual.setHijo(posicionPorDondeBajar, nuevoHijo);
+                        nodoActual = NodoMVias.nodoVacio();
+                    }else{
+                        nodoActual = nodoActual.getHijo(posicionPorDondeBajar);
+                    }
+                }
+            }
+        }
+    }
+    //falta
+    protected void insertarDatosEnOrdenadoEnNodo(NodoMVias<K,V> nodoActual,
+            K claveAInsertar,V valorAInsertar){
+        if (NodoMVias.datoVacio() == nodoActual.getClave(0)){
+            nodoActual.setClave(0, claveAInsertar);
+            nodoActual.setValor(0, valorAInsertar);
+        }
+        int posicion = nodoActual.cantidadDeClavesNoVacios() -1;
+        K KMayor = nodoActual.getClave(posicion);
+        V VMayor = nodoActual.getValor(posicion);
+        nodoActual.setClave(posicion + 1, KMayor);
+        nodoActual.setValor(posicion+1,VMayor);
+        for (int i = posicion; claveAInsertar.compareTo(KMayor) < 0; i--){
+            nodoActual.setClave(i+1, KMayor);
+            nodoActual.setValor(i+1, VMayor);
+            nodoActual.setClave(i, KMayor);
+            nodoActual.setValor(i, VMayor);
+            if (i - 1 >= 0){
+                KMayor = nodoActual.getClave(i-1);
+            }else {
+                KMayor = claveAInsertar;
+            }
+        }
+    }
+    //falta
+    protected int porDondeBajar(NodoMVias<K, V> nodoActual, K claveAInsertar) {
+        int porDondeBajar = 0;
+        K claveActual = nodoActual.getClave(porDondeBajar);
+        while (claveAInsertar.compareTo(claveActual) > 0) {
+            porDondeBajar++;
+            //preguntar si es llego a la ultima clave para bajar
+            if (porDondeBajar < nodoActual.cantidadDeClavesNoVacios()){
+                claveActual = nodoActual.getClave(porDondeBajar);
+            } else {
+                    claveActual = claveAInsertar;
+            }
+        }
+        return porDondeBajar;
+    }
+    
+    protected int existeClaveEnNodo(NodoMVias<K,V> nodoActual,K claveABuscar){
+        for (int i = 0; i < nodoActual.cantidadDeClavesNoVacios(); i++){
+            K claveActual = nodoActual.getClave(i);
+            if (claveActual.compareTo(claveABuscar)==0){
+                return i;
+            }
+        }
+        return POSICION_INVALIDA;
     }
 
     @Override
-    public V eliminar(K clave) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public V eliminar(K claveAEliminar) {
+        if (claveAEliminar == null) {
+            throw new ExcepcionClaveNoExiste("Clave a eliminar no puede ser nula");
+        }
+        V valorARetornar = this.buscar(claveAEliminar);
+        if (valorARetornar == null) {
+            throw new ExcepcionClaveNoExiste("La clave no existe en el arbol");
+        }
+        
+        this.raiz = eliminar(this.raiz, claveAEliminar);
+        return valorARetornar;
     }
+    
+    private NodoMVias<K,V> eliminar(NodoMVias<K,V> nodoActual,K claveAEliminar){
+        if (NodoMVias.esNodoVacio(nodoActual)) {
+            return null;
+        }
+        for (int i = 0; i< nodoActual.cantidadDeClavesNoVacios(); i++){
+            K claveActual = nodoActual.getClave(i);
+            if (claveAEliminar.compareTo(claveActual)==0){
+                if (nodoActual.esHoja()){// si en caso sea hoja la clave a eliminar
+                    this.eliminarDatosDeNodo(nodoActual,claveAEliminar);
+                    if (nodoActual.cantidadDeClavesNoVacios() == 0){
+                        return NodoMVias.nodoVacio();
+                    }
+                    return nodoActual;
+                }
+                //si no es hoja la clave es un nodo no hoja
+                //implementar 3 metodos
+                K claveDeReemplazo ;
+                if (this.hayHijosMasAdelante(nodoActual,i)){
+                    claveDeReemplazo = this.buscarClaveSucesoraInOrden(nodoActual,claveAEliminar);
+                } else {
+                    claveDeReemplazo = this.buscarClavePredecesoraInOrden(nodoActual,claveAEliminar);
+                }
+                V valorDeReemplazo = this.buscar(claveDeReemplazo);
+                nodoActual = eliminar(nodoActual,claveDeReemplazo);
+                nodoActual.setClave(i, claveDeReemplazo);
+                nodoActual.setValor(i, valorDeReemplazo);
+                return nodoActual;
+            }   
+            if (claveAEliminar.compareTo(claveActual)<0){
+                NodoMVias<K,V> supuestoNuevoHijo = this.eliminar(nodoActual.getHijo(i),claveAEliminar);
+                nodoActual.setHijo(i, supuestoNuevoHijo);
+                return nodoActual;
+            }
+        }//fin del for ultimo hijo
+        NodoMVias<K,V> supuestoNuevoHijo = this.eliminar(
+                nodoActual.getHijo(nodoActual.cantidadDeClavesNoVacios()),claveAEliminar);
+        nodoActual.setHijo(nodoActual.cantidadDeClavesNoVacios(), supuestoNuevoHijo);
+        return nodoActual;
+    }
+    protected void eliminarDatosDeNodo(NodoMVias<K,V> nodoActual,K claveAEliminar){
+        int posicion = nodoActual.cantidadDeClavesNoVacios() - 1;
+        K datoActual = (K) nodoActual.getClave(posicion);
+        nodoActual.setClave(nodoActual.cantidadDeClavesNoVacios() - 1, null);
+        for (int i = posicion - 1; claveAEliminar.compareTo(datoActual) != 0; i--) {
+            K datoAuxiliar = nodoActual.getClave(i);
+            nodoActual.setClave(i, datoActual);
+            datoActual = datoAuxiliar;
+        }
+    }
+    private boolean hayHijosMasAdelante(NodoMVias<K,V> nodoActual, Integer posicion) {
+        if (!NodoMVias.esNodoVacio(nodoActual.getHijo(posicion + 1)) ||
+                nodoActual.getClave(posicion + 1) != NodoMVias.datoVacio()) {
+            return true;
+        }
+        return false;
+    }
+    
+      private K buscarClaveSucesoraInOrden(NodoMVias<K,V> nodoActual, K claveAEliminar) {
+        K sucesor = (K) NodoMVias.datoVacio();
 
+        for (int i = 0; i < nodoActual.cantidadDeClavesNoVacios(); i++) {
+            sucesor = (K) nodoActual.getClave(i);
+            if (claveAEliminar.compareTo(sucesor) == 0) {
+                if (NodoMVias.esNodoVacio(nodoActual.getHijo(i + 1))) {
+                    return (K) nodoActual.getClave(i + 1);
+                }
+                nodoActual = nodoActual.getHijo(i + 1);
+                i = nodoActual.cantidadDeClavesNoVacios() + 1;
+            }
+        }
+        while (!NodoMVias.esNodoVacio(nodoActual.getHijo(0))) {
+            nodoActual = nodoActual.getHijo(0);
+        }
+        sucesor = (K) nodoActual.getClave(0);
+        return sucesor;
+    }  
+      
+        private K buscarClavePredecesoraInOrden(NodoMVias<K,V> nodoActual, K datoAEliminar) {
+        K predecesor = (K) NodoMVias.datoVacio();
+        for (int i = 0; i < nodoActual.cantidadDeClavesNoVacios(); i++) {
+            predecesor = (K) nodoActual.getClave(i);
+            if (datoAEliminar.compareTo(predecesor) == 0) {
+                nodoActual = nodoActual.getHijo(i);
+                predecesor = nodoActual.getClave(nodoActual.cantidadDeClavesNoVacios() - 1);
+            }
+        }
+
+        while (!NodoMVias.esNodoVacio(nodoActual.getHijo(nodoActual.cantidadDeClavesNoVacios()))) {
+            nodoActual = nodoActual.getHijo(nodoActual.cantidadDeClavesNoVacios());
+            predecesor = nodoActual.getClave(nodoActual.cantidadDeClavesNoVacios() - 1);
+        }
+        return predecesor;
+    }
     @Override
     public boolean contiene(K clave) {
         return this.buscar(clave) != null;
@@ -235,10 +493,6 @@ public class ArbolMViasBusqueda<K extends Comparable<K>, V> implements
         int cantidad = 0;
         for (int i = 0; i < orden; i++) {
             cantidad += cantidadDeHojas(nodoActual.getHijo(i));
-            /*
-            if (nodoActual.esHoja)
-                cantidad++;
-             */
         }
         return cantidad;
     }
